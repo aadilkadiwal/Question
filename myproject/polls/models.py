@@ -16,6 +16,11 @@ class Question(models.Model):
     def verbose_question_text(self):
         return f'Question : {self.question_text}'    
 
+    def choices(self):
+        if not hasattr(self, '_choices'):
+            self._choices = self.choice_set.all()
+        return self._choices        
+
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
