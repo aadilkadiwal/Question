@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from .models import Question, Choice
-from .serializers import QuestionListPageSerializer, ChoiceSerializer, QuestionResultPageSerializer, VoteSerializer
+from .serializers import QuestionDetailPageSerializer, QuestionListPageSerializer, ChoiceSerializer, QuestionResultPageSerializer, VoteSerializer
 
 
 # @api_view: Can handle form data as well as json data
@@ -18,7 +18,7 @@ def questions_view(request):
         serializer = QuestionListPageSerializer(data=request.data)
         if serializer.is_valid():
             question = serializer.save()
-            return Response("Question created", status=status.HTTP_201_CREATED) 
+            return Response(QuestionDetailPageSerializer(question).data, status=status.HTTP_201_CREATED) 
 
         # serializer.error: Error message is provided by serializer    
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)       
@@ -64,3 +64,11 @@ def question_result_view(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     serializer = QuestionResultPageSerializer(question)
     return Response(serializer.data)       
+
+@api_view(['POST'])
+def multiple_question_view(request):
+    serializer = QuestionListPageSerializer(many=True, data=request.data)
+    if serializer.is_valid():
+        questions = serializer.save()
+        return Response(QuestionDetailPageSerializer(questions, many=True).data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
